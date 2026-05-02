@@ -25,3 +25,37 @@ sqlite3 db.sqlite3 < create_db.sql
 11 - sex (M,F,firma,neznamy)
 12 - region
 13 - flag {0:ziaden,1:velky dar,2:velka pozicka,3:vysoke bezodplatne plnenie}
+
+
+
+
+sqlite3 -column  -header db.sqlite3 "SELECT parties.name,donors.name, donations.amount FROM donati
+ons,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id LIMIT 10"
+
+
+sqlite3 -column  -header db.sqlite3 "SELECT parties.name,donors.name, donations.amount, donations.income_type FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id ORDER BY amount DESC
+ LIMIT 10"
+ 
+name     name                         amount      income_type
+-------  ---------------------------  ----------  -----------
+HLAS     Fio banka, a.s.              2000000     úver       
+SMER     Privatbanka, a.s.            1327756.75  úver       
+KDH      Dexia banka Slovensko a. s.  1000000     pôžička    
+SMER     OTP Banka Slovensko a. s.    1000000     úver       
+SMER     OTP Banka Slovensko a. s.    1000000     úver       
+KDH      OTP Banka Slovensko a. s.    1000000     pôžička    
+SIEŤ     Fio banka, a.s.              1000000     úver       
+ZA ĽUDÍ  Andrej Kiska                 1000000     pôžička    
+SDKÚ-DS  ISTROBANKA                   995818      pôžička    
+PS       Michal Truban                900000      pôžička    
+
+ #https://volby.transparency.sk/api/donors/donations.php?b=22200&s=date
+
+sqlite3 db.sqlite3 "SELECT COUNT(*) FROM donations"
+#--22198
+sqlite3 db.sqlite3 "SELECT COUNT(*) FROM donors"
+#--11047
+sqlite3 db.sqlite3 "SELECT COUNT(*) FROM parties"
+#--62
+sqlite3 db.sqlite3 "SELECT SUM(amount) FROM donations"
+#-- 73 821 898.78

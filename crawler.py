@@ -16,7 +16,7 @@ cursor.execute("""DROP TABLE IF EXISTS parties""")
 cursor.execute("""DROP TABLE IF EXISTS donations""")
 
 cursor.execute("""CREATE TABLE donors (
-  user_id INT,
+  user_id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT,
   type TEXT,
   sex TEXT,
@@ -27,12 +27,12 @@ cursor.execute("""CREATE TABLE donors (
 #TODO najst ktore politicke strany podporil jednotlivy kandidat..
 
 cursor.execute("""CREATE TABLE parties (
-  party_id INT,
+  party_id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT
                )""")
 #TODO later add info about political parties (SOMEHOW)
 cursor.execute("""CREATE TABLE donations (
-  donate_id INT,
+  donate_id INTEGER PRIMARY KEY AUTOINCREMENT,
   party_id INT,
   date TEXT,
   user_id INT,
@@ -82,9 +82,6 @@ region_map = {
     "KE": "Košický"
 }
 page_counter = 0
-donor_counter = 1
-party_counter = 1
-donation_counter = 1
 unknown_counter = 1
 
 while page_counter < max_pages:
@@ -102,9 +99,11 @@ while page_counter < max_pages:
       if donation[2] == "": #if name of person doesnt exist in this donation
         user_type = "firma"
         user_name = donation[4] #name of company
+        sex = None
       else:
         user_type = "fyzická osoba"
         user_name = donation[2]
+        sex = donation[11]
         if "neznáme" in user_name:
           user_name = "Neznámy darca" + str(unknown_counter) #think about how to do it better. or just throw it out? mention in report.
           unknown_counter +=1
@@ -113,30 +112,28 @@ while page_counter < max_pages:
       income_type = income_type_map.get(donation[6])
       amount = round(donation[8],2)
       source = donation[9]
-      sex = donation[11] if donation[2] != "" else None #give NULL to companies
-
       region = donation[12]
       region_long = region_map.get(region) if region != "" else ""
       flag = flag_map.get(donation[13])
 
-      user_exists = cursor.execute("SELECT name FROM donors WHERE name = (?) AND city = (?)",(user_name,city)).fetchone()
-      if not user_exists: #we didnt meet this donor previously
-        cursor.execute("INSERT INTO donors (user_id,name,type,sex,city,region,region_long) VALUES (?,?,?,?,?,?,?)",
-                        (donor_counter,user_name,user_type,sex,city,region,region_long))
-        connection.commit()
-        donor_counter += 1
-      
-      party_exists = cursor.execute("SELECT name FROM parties WHERE name = (?)",(party_name,)).fetchone()
-      if not party_exists:
-        cursor.execute("INSERT INTO parties (party_id, name) VALUES (?,?)",(party_counter,party_name))
-        connection.commit()
-        party_counter += 1
-      party_id = cursor.execute("SELECT party_id FROM parties WHERE name = (?)",(party_name,)).fetchall()[0][0]
-      user_id = cursor.execute("SELECT user_id FROM donors WHERE name = (?) AND city = (?)",(user_name,city)).fetchall()[0][0]
-      cursor.execute("INSERT INTO donations (donate_id,party_id,date,user_id,user_type,sex,city,region,income_type,amount,flag,source) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                      (donation_counter,party_id,date,user_id,user_type,sex,city,region,income_type,amount,flag,source))  
-      connection.commit()
-      donation_counter += 1  
+      user_exists = cursor.execute("SELECT user_id FROM donors WHERE name = (?) AND city = (?)",(user_name,city)).fetchone()
+      if user_exists: #we met this donor previously
+        user_id = user_exists[0]
+      else:
+        cursor.execute("INSERT INTO donors (name,type,sex,city,region,region_long) VALUES (?,?,?,?,?,?)",
+                        (user_name,user_type,sex,city,region,region_long))
+        user_id = cursor.lastrowid
+
+      party_exists = cursor.execute("SELECT party_id FROM parties WHERE name = (?)",(party_name,)).fetchone()
+      if party_exists:
+        party_id = party_exists[0]
+      else:
+        cursor.execute("INSERT INTO parties (name) VALUES (?)",(party_name,))
+        party_id = cursor.lastrowid
+
+      cursor.execute("INSERT INTO donations (party_id,date,user_id,user_type,sex,city,region,income_type,amount,flag,source) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                      (party_id,date,user_id,user_type,sex,city,region,income_type,amount,flag,source))  
+      connection.commit() 
   except Exception as e:
     print(f"Error on page {page_counter}: {e}")
     break
