@@ -3,3 +3,25 @@
 python -m venv venv
 source ./venv/bin/activate
 pip install bs4 requests numpy argparse
+
+##create database
+sqlite3 db.sqlite3 < create_db.sql 
+
+##JSON ONE ROW...
+
+0 - political party
+1 - date 
+2 - name of PERSON
+3 - ID on transparency international
+4 - name of COMPANY
+5 - city 
+6 - income type{1: bezodplatne plnenie,2: clensky prispevok, 3:financny dar, 4: nepenazny dar, 5: pozicka, 6:uver, 7:zmluvne dojednanie}
+                #Finančný dar: Suma 1 000 € znamená, že na účet strany reálne pribudlo 1 738313000 €.
+                #Bezodplatné plnenie: Suma 1 000 € znamená, že strana ušetrila 1 000 €, lebo jej niečo bolo poskytnuté bez platenia.
+7 - comment
+8 - amount ... (prepočítané kurzom 30,126 SKK=1 euro)
+9 - source
+10 - more comments
+11 - sex (M,F,firma,neznamy)
+12 - region
+13 - flag {0:ziaden,1:velky dar,2:velka pozicka,3:vysoke bezodplatne plnenie}

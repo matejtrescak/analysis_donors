@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS donors (
   type TEXT,
   sex TEXT,
   city TEXT,
-  region TEXT
+  region TEXT,
+  region_long TEXT,
 );
 
 .mode csv
