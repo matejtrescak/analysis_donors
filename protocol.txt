@@ -1,0 +1,5 @@
+## commands run to import libraries, create venv.
+
+python -m venv venv
+source ./venv/bin/activate
+pip install bs4 requests numpy argparse
