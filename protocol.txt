@@ -59,3 +59,21 @@ sqlite3 db.sqlite3 "SELECT COUNT(*) FROM parties"
 #--62
 sqlite3 db.sqlite3 "SELECT SUM(amount) FROM donations"
 #-- 73 821 898.78
+sqlite3 db.sqlite3 "SELECT count(sex) FROM donors"
+# -- 10552.. which means 
+
+sqlite3 db.sqlite3 "SELECT type,COUNT()  FROM donors GROUP BY type"
+#-- firma|495
+#-- fyzická osoba|10552
+
+sqlite3 db.sqlite3 "SELECT sex, COUNT()  FROM donors GROUP BY sex"
+#|495
+#F|3255
+#M|7293
+#neznáme|4
+#data for inflation... TODO reorganise, make useful LATER
+#https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG?end=2024&locations=SK&start=1992&view=chart
+
+
+#election year table indicates whether in that year there was an election
+

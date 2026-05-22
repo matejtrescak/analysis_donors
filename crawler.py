@@ -47,13 +47,12 @@ cursor.execute("""CREATE TABLE donations (
                )""")
 #connect to database and clear its contents before you start anything
 
-max_pages = 222
 api_url = "https://volby.transparency.sk/api/donors/donations.php"
 
 headers = {
     'User-Agent': 'Mozilla/5.0'
 }
-all_data = []
+
 limit = 100
 
 income_type_map = {
@@ -66,7 +65,7 @@ income_type_map = {
     7: "zmluvné dojednanie"
 }
 flag_map = {
-    0: None,
+    0: None, #no flag appearing
     1: "veľký dar",
     2: "veľká pôžička",
     3: "vysoké bezodplatné plnenie"
@@ -79,20 +78,22 @@ region_map = {
     "ZA": "Žilinský",
     "BB": "Banskobystrický",
     "PO": "Prešovský",
-    "KE": "Košický"
+    "KE": "Košický",
+    "neznáme": "neznámy"
 }
 page_counter = 0
 unknown_counter = 1
 
-while page_counter < max_pages:
+while True:
   params = {'b': limit, 'o': page_counter, 's': 'date'}
   try:
     response = requests.get(api_url, params=params, headers=headers)
     response.raise_for_status()
   
     data = response.json()
-    all_data.extend(data)
     donations = data.get('rows', [])
+    if not donations: #there is nothing in the api anymore
+      break
     for donation in donations:
       party_name = donation[0]
       date = donation[1]
@@ -105,13 +106,18 @@ while page_counter < max_pages:
         user_name = donation[2]
         sex = donation[11]
         if "neznáme" in user_name:
-          user_name = "Neznámy darca" + str(unknown_counter) #think about how to do it better. or just throw it out? mention in report.
+          user_name = "Neznámy darca "+ str(unknown_counter) 
           unknown_counter +=1
 
-      city = donation[5]
+      if (donation[5] == ""):
+        city = "neznáme"
+      else:
+        city = donation[5] 
+
       income_type = income_type_map.get(donation[6])
       amount = round(donation[8],2)
       source = donation[9]
+
       region = donation[12]
       region_long = region_map.get(region) if region != "" else ""
       flag = flag_map.get(donation[13])
@@ -139,4 +145,5 @@ while page_counter < max_pages:
     break
 
   time.sleep(1)
+  #to be merciful
   page_counter+=1
