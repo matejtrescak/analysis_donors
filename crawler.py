@@ -83,6 +83,7 @@ region_map = {
 page_counter = 0
 unknown_counter = 1
 
+
 while True:
   params = {'b': limit, 'o': page_counter, 's': 'date'}
   try:
@@ -94,6 +95,7 @@ while True:
     if not donations: #there is nothing in the api anymore
       break
     for donation in donations:
+      #open api_row.txt to understand indexing in 'donation'
       party_name = donation[0]
       date = donation[1]
       if donation[2] == "": #if name of person doesnt exist in this donation

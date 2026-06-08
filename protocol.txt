@@ -1,70 +1,73 @@
-## commands run to import libraries, create venv.
+## PROJECT PROTOCOL
 
+# List of submitted files
+
+data_sources/donations.csv - contains human readable form of the database
+data_sources/election_dates.csv - contains dates for parliamentary and presidential elections between years 2002-2024
+image_exports/ - contains all images used in project report.
+crawler.py - script for crawling the api
+create_db.sql - script to create the database
+db.sqlite3 - database
+protocol.txt - protocol
+api_row.txt - helper txt file to understand indices in a code
+requirements.txt - list of needed libraries
+visualisations.ipynb - final analysis and visualisations
+
+
+# commands to create venv, import libraries
 python -m venv venv
 source ./venv/bin/activate
-pip install bs4 requests numpy argparse seaborn scipy seaborn
+pip install -r requirements.txt
 
-##create database
+# create database
 sqlite3 db.sqlite3 < create_db.sql 
 
-
-
-
-##JSON ONE ROW...
-
-0 - political party
-1 - date 
-2 - name of PERSON
-3 - ID on transparency international
-4 - name of COMPANY
-5 - city 
-6 - income type{1: bezodplatne plnenie,2: clensky prispevok, 3:financny dar, 4: nepenazny dar, 5: pozicka, 6:uver, 7:zmluvne dojednanie}
-                #Finančný dar: Suma 1 000 € znamená, že na účet strany reálne pribudlo 1 000 €.
-                #Bezodplatné plnenie: Suma 1 000 € znamená, že strana ušetrila 1 000 €, lebo jej niečo bolo poskytnuté bez platenia.
-                1,2,3,4,7 by som dal skupiny do dary
-                5,6 do skupiny uvery a pozicky.
-7 - comment
-8 - amount ... (prepočítané kurzom 30,126 SKK=1 euro)
-9 - source
-10 - more comments
-11 - sex (M,F,firma,neznamy)
-12 - region
-13 - flag {0:ziaden,1:velky dar,2:velka pozicka,3:vysoke bezodplatne plnenie}
-
-
+# run crawling script, the script is well documented in comments. it takes around 20 minutes
 screen
 python3 crawler.py
 
-sqlite3 -column  -header db.sqlite3 "SELECT parties.name,donors.name, donations.amount FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id LIMIT 10"
+# few sqlite commands 
+sqlite3 -column  -header db.sqlite3 "SELECT parties.name as party,donors.name, donations.amount FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id LIMIT 5"
+
+party  name                 amount 
+-----  -------------------  -------
+SMER   SIMKOR s.r.o.        398.33 
+SMER   Imas s.r.o.          66.39  
+SMER   AKUTRADE s.r.o.      132.78 
+SMER   Alkis - Kiss Andrej  1659.7 
+SMER   City servis, a.s.    3589.92
 
 
-sqlite3 -column  -header db.sqlite3 "SELECT parties.name,donors.name, donations.amount, donations.income_type FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id ORDER BY amount DESC LIMIT 10"
+
+sqlite3 -column  -header db.sqlite3 "SELECT parties.name as party,donors.name, donations.amount, donations.income_type FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id ORDER BY amount DESC LIMIT 5"
  
-name     name                         amount      income_type
--------  ---------------------------  ----------  -----------
-HLAS     Fio banka, a.s.              2000000     úver       
-SMER     Privatbanka, a.s.            1327756.75  úver       
-KDH      Dexia banka Slovensko a. s.  1000000     pôžička    
-SMER     OTP Banka Slovensko a. s.    1000000     úver       
-SMER     OTP Banka Slovensko a. s.    1000000     úver       
-KDH      OTP Banka Slovensko a. s.    1000000     pôžička    
-SIEŤ     Fio banka, a.s.              1000000     úver       
-ZA ĽUDÍ  Andrej Kiska                 1000000     pôžička    
-SDKÚ-DS  ISTROBANKA                   995818      pôžička    
-PS       Michal Truban                900000      pôžička    
+party  name                         amount      income_type
+-----  ---------------------------  ----------  -----------
+HLAS   Fio banka, a.s.              2000000     úver       
+SMER   Privatbanka, a.s.            1327756.75  úver       
+KDH    Dexia banka Slovensko a. s.  1000000     pôžička    
+SMER   OTP Banka Slovensko a. s.    1000000     úver       
+SMER   OTP Banka Slovensko a. s.    1000000     úver     
 
- #https://volby.transparency.sk/api/donors/donations.php?b=22200&s=date
+
+# link to check summary of the donations api
+https://volby.transparency.sk/api/donors/donations.php?b=22200&s=date
 
 sqlite3 db.sqlite3 "SELECT COUNT(*) FROM donations"
 #--22198
+
 sqlite3 db.sqlite3 "SELECT COUNT(*) FROM donors"
 #--11047
+
 sqlite3 db.sqlite3 "SELECT COUNT(*) FROM parties"
 #--62
+
 sqlite3 db.sqlite3 "SELECT SUM(amount) FROM donations"
 #-- 73 821 898.78
+# very small difference, just because im rounding to 2 decimals in the database
+
 sqlite3 db.sqlite3 "SELECT count(sex) FROM donors"
-# -- 10552.. which means 
+# -- 10552
 
 sqlite3 db.sqlite3 "SELECT type,COUNT()  FROM donors GROUP BY type"
 #-- firma|495
@@ -75,12 +78,37 @@ sqlite3 db.sqlite3 "SELECT sex, COUNT()  FROM donors GROUP BY sex"
 #F|3255
 #M|7293
 #neznáme|4
-#data for inflation... TODO make useful LATER
-#https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG?end=2024&locations=SK&start=1992&view=chart
 
 
-#election year table indicates whether in that year there was an election 
-#in either national or european parliament.
+# visualisations
+mkdir data_sources
+
+# export a table to use for visualising.
+sqlite3 -header -csv db.sqlite3 "SELECT parties.name as party, donations.party_id, donors.name as donor, donors.user_id, donations.date, donations.user_type, donations.sex,donations.city,donors.region_long as region, donations.income_type,donations.amount FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id" >data_sources/donations.csv
+
+# the visualisations are easily run in visualisations.ipynb
+# results are in image_exports/
+
+
+# list of resources
+
+https://volby.transparency.sk/financovanie/darcovia
+https://sk.wikipedia.org/wiki/Zoznam_volieb_na_Slovensku
+https://dennikn.sk/blog/4842622/hlas-nie-je-len-stranou-peknych-ale-aj-bohatych-ludi/
+
+https://docs.python.org/3/library/sqlite3.html
+https://pandas.pydata.org/docs/index.html
+https://seaborn.pydata.org/index.html
+https://matplotlib.org/stable/
+https://stackoverflow.com/
+https://www.reddit.com/
+
+
+
+
+
+
+
 
 # co moze byt flask website? 
 # uvodny page: list vsetkych politickych stran, ktore som nazbieral 
@@ -92,10 +120,6 @@ sqlite3 db.sqlite3 "SELECT sex, COUNT()  FROM donors GROUP BY sex"
     ## dary
 ## priemerny prispevok
 
-#jupyter
-1. reprodukcia analyz ci sedia s ich analyzami
-  
-
-
-#VISUALISATIONS
-sqlite3 -header -csv db.sqlite3 "SELECT parties.name as party, donations.party_id, donors.name as donor, donors.user_id, donations.date, donations.user_type, donations.sex,donations.city,donors.region_long as region, donations.income_type,donations.amount,donations.flag FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id" >data_sources/donations.csv
+export FLASK_APP=main.py
+export FLASK_ENV=development
+flask run --port=3220
