@@ -24,13 +24,12 @@ cursor.execute("""CREATE TABLE donors (
   region TEXT,
   region_long TEXT
                )""")
-#TODO najst ktore politicke strany podporil jednotlivy kandidat..
 
 cursor.execute("""CREATE TABLE parties (
   party_id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT
                )""")
-#TODO later add info about political parties (SOMEHOW)
+
 cursor.execute("""CREATE TABLE donations (
   donate_id INTEGER PRIMARY KEY AUTOINCREMENT,
   party_id INT,

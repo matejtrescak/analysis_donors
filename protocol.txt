@@ -2,10 +2,13 @@
 
 python -m venv venv
 source ./venv/bin/activate
-pip install bs4 requests numpy argparse
+pip install bs4 requests numpy argparse seaborn scipy seaborn
 
 ##create database
 sqlite3 db.sqlite3 < create_db.sql 
+
+
+
 
 ##JSON ONE ROW...
 
@@ -16,8 +19,10 @@ sqlite3 db.sqlite3 < create_db.sql
 4 - name of COMPANY
 5 - city 
 6 - income type{1: bezodplatne plnenie,2: clensky prispevok, 3:financny dar, 4: nepenazny dar, 5: pozicka, 6:uver, 7:zmluvne dojednanie}
-                #Finančný dar: Suma 1 000 € znamená, že na účet strany reálne pribudlo 1 738313000 €.
+                #Finančný dar: Suma 1 000 € znamená, že na účet strany reálne pribudlo 1 000 €.
                 #Bezodplatné plnenie: Suma 1 000 € znamená, že strana ušetrila 1 000 €, lebo jej niečo bolo poskytnuté bez platenia.
+                1,2,3,4,7 by som dal skupiny do dary
+                5,6 do skupiny uvery a pozicky.
 7 - comment
 8 - amount ... (prepočítané kurzom 30,126 SKK=1 euro)
 9 - source
@@ -27,14 +32,13 @@ sqlite3 db.sqlite3 < create_db.sql
 13 - flag {0:ziaden,1:velky dar,2:velka pozicka,3:vysoke bezodplatne plnenie}
 
 
+screen
+python3 crawler.py
+
+sqlite3 -column  -header db.sqlite3 "SELECT parties.name,donors.name, donations.amount FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id LIMIT 10"
 
 
-sqlite3 -column  -header db.sqlite3 "SELECT parties.name,donors.name, donations.amount FROM donati
-ons,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id LIMIT 10"
-
-
-sqlite3 -column  -header db.sqlite3 "SELECT parties.name,donors.name, donations.amount, donations.income_type FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id ORDER BY amount DESC
- LIMIT 10"
+sqlite3 -column  -header db.sqlite3 "SELECT parties.name,donors.name, donations.amount, donations.income_type FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id ORDER BY amount DESC LIMIT 10"
  
 name     name                         amount      income_type
 -------  ---------------------------  ----------  -----------
@@ -71,9 +75,27 @@ sqlite3 db.sqlite3 "SELECT sex, COUNT()  FROM donors GROUP BY sex"
 #F|3255
 #M|7293
 #neznáme|4
-#data for inflation... TODO reorganise, make useful LATER
+#data for inflation... TODO make useful LATER
 #https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG?end=2024&locations=SK&start=1992&view=chart
 
 
-#election year table indicates whether in that year there was an election
+#election year table indicates whether in that year there was an election 
+#in either national or european parliament.
 
+# co moze byt flask website? 
+# uvodny page: list vsetkych politickych stran, ktore som nazbieral 
+# po prekliknuti na konkretnu politicku stranu
+## sucet za cele obdobie
+## top 10 uverov, poziciek.
+## bary graph za roky (oznacit election years?)
+    ## uvery a pozicky
+    ## dary
+## priemerny prispevok
+
+#jupyter
+1. reprodukcia analyz ci sedia s ich analyzami
+  
+
+
+#VISUALISATIONS
+sqlite3 -header -csv db.sqlite3 "SELECT parties.name as party, donations.party_id, donors.name as donor, donors.user_id, donations.date, donations.user_type, donations.sex,donations.city,donors.region_long as region, donations.income_type,donations.amount,donations.flag FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id" >data_sources/donations.csv
