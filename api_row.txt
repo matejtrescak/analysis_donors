@@ -11,5 +11,5 @@
 9 - source
 10 - more comments
 11 - sex (M,F,firma,neznamy)
-12 - region
+12 - region 
 13 - flag {0:ziaden,1:velky dar,2:velka pozicka,3:vysoke bezodplatne plnenie}

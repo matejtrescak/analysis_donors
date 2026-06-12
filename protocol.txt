@@ -1,5 +1,8 @@
 ## PROJECT PROTOCOL
 
+# Matej Treščák
+# trescak3
+
 # List of submitted files
 
 data_sources/donations.csv - contains human readable form of the database
@@ -12,6 +15,7 @@ protocol.txt - protocol
 api_row.txt - helper txt file to understand indices in a code
 requirements.txt - list of needed libraries
 visualisations.ipynb - final analysis and visualisations
+trescak_project_report.pdf
 
 
 # commands to create venv, import libraries
@@ -51,7 +55,7 @@ SMER   OTP Banka Slovensko a. s.    1000000     úver
 
 
 # link to check summary of the donations api
-https://volby.transparency.sk/api/donors/donations.php?b=22200&s=date
+https://volby.transparency.sk/api/donors/donations.php?b=0
 
 sqlite3 db.sqlite3 "SELECT COUNT(*) FROM donations"
 #--22198
@@ -102,24 +106,4 @@ https://seaborn.pydata.org/index.html
 https://matplotlib.org/stable/
 https://stackoverflow.com/
 https://www.reddit.com/
-
-
-
-
-
-
-
-
-# co moze byt flask website? 
-# uvodny page: list vsetkych politickych stran, ktore som nazbieral 
-# po prekliknuti na konkretnu politicku stranu
-## sucet za cele obdobie
-## top 10 uverov, poziciek.
-## bary graph za roky (oznacit election years?)
-    ## uvery a pozicky
-    ## dary
-## priemerny prispevok
-
-export FLASK_APP=main.py
-export FLASK_ENV=development
-flask run --port=3220
+https://gemini.google.com/

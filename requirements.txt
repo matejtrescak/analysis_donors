@@ -1,5 +1,4 @@
 requests
 numpy
-argparse
 seaborn
 scipy
