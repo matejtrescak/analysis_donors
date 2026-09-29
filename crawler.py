@@ -123,18 +123,17 @@ while True:
       region_long = region_map.get(region) if region != "" else ""
       flag = flag_map.get(donation[13])
 
-      # user_exists = cursor.execute("SELECT user_id FROM donors WHERE name = (?) AND city = (?)",(user_name,city)).fetchone()
+      user_exists = cursor.execute("SELECT user_id FROM donors WHERE name = (?) AND city = (?)",(user_name,city)).fetchone()
 
-      # Najprv skús nájsť podľa mena a mesta (ak je mesto zadané)
-      if (city != "neznáme"):
-          query = "SELECT user_id FROM donors WHERE name = ? AND city = ?"
-          params = (user_name, city)
-      else:
-          # Ak mesto nie je, hľadaj len podľa mena
-          query = "SELECT user_id FROM donors WHERE name = ?"
-          params = (user_name,)
+      # if (city != "neznáme"):
+      #     query = "SELECT user_id FROM donors WHERE name = ? AND city = ?"
+      #     params = (user_name, city)
+      # else:
+      #     # Ak mesto nie je, hľadaj len podľa mena
+      #     query = "SELECT user_id FROM donors WHERE name = ?"
+      #     params = (user_name,)
 
-      user_exists = cursor.execute(query, params).fetchone()
+      # user_exists = cursor.execute(query, params).fetchone()
 
       if user_exists: #we met this donor previously
         user_id = user_exists[0]
@@ -157,6 +156,6 @@ while True:
     print(f"Error on page {page_counter}: {e}")
     break
 
-  # time.sleep(1)
+  time.sleep(1)
   #to be merciful
   page_counter+=1
