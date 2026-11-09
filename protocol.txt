@@ -83,13 +83,6 @@ sqlite3 db.sqlite3 "SELECT sex, COUNT()  FROM donors GROUP BY sex"
 #M|7293
 #neznáme|4
 
-
-# visualisations
-mkdir data_sources
-
-# export a table to use for visualising.
-sqlite3 -header -csv db.sqlite3 "SELECT parties.name as party, donations.party_id, donors.name as donor, donors.user_id, donations.date, donations.user_type, donations.sex,donations.city,donors.region_long as region, donations.income_type,donations.amount FROM donations,parties,donors WHERE donations.party_id = parties.party_id AND donations.user_id = donors.user_id" >data_sources/donations.csv
-
 # the visualisations are easily run in visualisations.ipynb
 # results are in image_exports/
 

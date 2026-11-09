@@ -1,4 +1,4 @@
-import requests,sqlite3,time
+import requests,sqlite3
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument(
@@ -156,6 +156,6 @@ while True:
     print(f"Error on page {page_counter}: {e}")
     break
 
-  time.sleep(1)
+  # time.sleep(1)
   #to be merciful
   page_counter+=1
